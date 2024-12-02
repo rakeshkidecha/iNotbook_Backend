@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
-const mongoURI = "mongodb://localhost:27017/data";
+const mongoURI = "mongodb://localhost:27017";
 
-const connectToMongo = async ()=>{
-    const connection = await mongoose.connect(mongoURI);
-    // console.log(connection);
-    console.log("successfull cpnnect to mongo db");
+const connectToMongo = ()=>{
+    try {
+        const connection = mongoose.connect(mongoURI);
+        console.log("successfull cpnnect to mongo db");
+    } catch (error) {
+        console.log(error)
+    }
 }
 
 
