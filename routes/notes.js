@@ -19,6 +19,7 @@ router.get('/fetchAllNotes',fetchUser,async(req,res)=>{
 router.post('/addNot',fetchUser,async(req,res)=>{
     try {
         const {title,description} = req.body;
+        
         const addedNot = await Note.create({
             title,description,user:req.user.id
         })
@@ -37,6 +38,7 @@ router.put('/updateNote/:id',fetchUser,async(req,res)=>{
         let newNote = {};
 
         let note = await Note.findById(req.params.id);
+
         if(!note){
             return res.status(404).send("Note not found..");
         }
