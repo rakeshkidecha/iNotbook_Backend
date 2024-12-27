@@ -6,7 +6,7 @@ const fetchUser = require('../middelware/fatchUser');
 // routes 1 fetch all notes are avalable on user 
 router.get('/fetchAllNotes',fetchUser,async(req,res)=>{
     try {
-        const allNotes = await Note.find();
+        const allNotes = await Note.find({user:req.user.id});
         res.json(allNotes);
 
     } catch (err) {

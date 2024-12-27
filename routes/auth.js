@@ -14,12 +14,13 @@ router.post('/createUser',[
     body('email','Enter a valid email').isEmail(),
     body('password',"enter a strong 8 charactors password").isLength({min:8}),
 ],async (req,res)=>{
+    let status = false;
     // if there are errors then sens in responce with status-coe 400 bad request
     const result = validationResult(req);
 
     // if there are any error response bad request 
     if (!result.isEmpty()) {
-        return res.status(400).json({errors:result.array()});
+        return res.status(400).json({status,errors:result.array()});
     }
 
     const isUserEmailExist = await User.findOne({email:req.body.email});
@@ -27,11 +28,11 @@ router.post('/createUser',[
     
     // if email already exists the showing error massage 
     if(isUserEmailExist){
-        return res.status(400).json({error:"This Email is already exist"});
+        return res.status(400).json({status,error:"This Email is already exist"});
     }
     // if password already exists the showing error massage 
     if(isUserPasswordExist){
-        return res.status(400).json({error:"This Password is already used"});
+        return res.status(400).json({status,error:"This Password is already used"});
     }
 
     try {
@@ -47,17 +48,18 @@ router.post('/createUser',[
         await user.save();
 
         const data = {
-            User:{
-                id : User.id
+            user:{
+                id : user.id
             }
         }
         const authToken = jwt.sign(data,JWT_SECRATE);
 
-        res.json({authToken});
+        status = true;
+        res.json({status,authToken});
 
     } catch (err) {
         console.log(err)
-        res.status(500).json({errors:"Some servers error.."})
+        res.status(500).json({status,errors:"Some servers error.."})
     }
 })
 
@@ -66,13 +68,13 @@ router.post('/login',[
     body('email','Enter a valid email').isEmail(),
     body('password',"Password not be blank").exists(),
 ],async (req,res)=>{
-    console.log("login reqeust")
+    let status = false;
     // if there are errors then sens in responce with status-coe 400 bad request
     const result = validationResult(req);
 
     // if there are any error response bad request 
     if (!result.isEmpty()) {
-        return res.status(400).json({errors:result.array()});
+        return res.status(400).json({status,errors:result.array()});
     }
 
     const {email,password} = req.body;
@@ -80,27 +82,28 @@ router.post('/login',[
     try {
         const user =await User.findOne({email});
         if(!user){
-           return res.status(400).json({error:"Invalid email or password"});
+           return res.status(400).json({status,error:"Invalid email or password"});
         }
 
         const passwordOfCompare = await bcrypt.compare(password,user.password);
         
         if(!passwordOfCompare){
-            return res.status(400).json({error:"Invalid email or password"});
+            return res.status(400).json({status,error:"Invalid email or password"});
         }
 
-        const data={
+        const data = {
             user:{
                 id : user.id
             }
         }
 
         const authToken =await jwt.sign(data,JWT_SECRATE);
-        return res.json({authToken});
+        status=true;
+        return res.json({status,authToken});
         
     } catch (error) {
         console.log(err)
-        res.status(500).json({errors:"Some servers error.."})
+        res.status(500).json({status,errors:"Some servers error.."})
     }
 
 })
